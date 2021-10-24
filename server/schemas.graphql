@@ -1,0 +1,25 @@
+scalar GraphQLDate
+
+type Customer {
+    serialNo: Int!
+    name: String!
+    phone: String!
+    timestamp: GraphQLDate!
+}
+
+input CreationInputs {
+    serialNo: Int!
+    name: String!
+    phone: String!
+}
+
+
+"Top level schemas"
+type Query {
+    waitlist: [Customer!]!
+}
+
+type Mutation {
+    createCustomer(customer: CreationInputs!): Customer!
+    deleteCustomer(serialNo: Int!): String
+}

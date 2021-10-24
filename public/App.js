@@ -1,4 +1,3 @@
-// actually not a very good way to import at the front-end without webpack...
 var Router = ReactRouterDOM.HashRouter;
 var Switch = ReactRouterDOM.Switch;
 var Route = ReactRouterDOM.Route;
@@ -7,7 +6,17 @@ var Link = ReactRouterDOM.Link;
 var useParams = ReactRouterDOM.useParams;
 const grid_row = 5;
 const grid_col = 5;
-const slots = grid_row * grid_col; // WaitlistPlatform: top level container that contains all the blocks
+const slots = grid_row * grid_col;
+const dateRegex = new RegExp('^\\d\\d\\d\\d-\\d\\d-\\d\\d'); // recover the timestamp to a js Date() object
+
+function jsonDateReviver(key, value) {
+  if (dateRegex.test(value)) {
+    return new Date(value);
+  }
+
+  return value;
+} // WaitlistPlatform: top level container that contains all the blocks
+
 
 class WaitlistPlatform extends React.Component {
   constructor() {
@@ -20,27 +29,75 @@ class WaitlistPlatform extends React.Component {
     this.deleteFromWaitlist = this.deleteFromWaitlist.bind(this);
   }
 
-  addToWaitlist(customer) {
-    const newWaitlist = this.state.waitlist.slice();
-    const serialNo = customer.id - 1;
+  componentDidMount() {
+    this.loadData();
+  }
 
-    if (newWaitlist[serialNo] != null) {
-      alert(`Sorry, slot ${serialNo + 1} is already occupied!`);
-    } else if (customer.serialNo == "") {
-      alert("Sorry, you must provide a serial No. for the new customer!");
-    } else if (customer.serialNo <= 0 || customer.serialNo > slots) {
+  async loadData() {
+    const query = `query {
+            waitlist {
+                serialNo name phone timestamp
+            }
+        }`;
+    const response = await fetch('/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query
+      })
+    });
+    const body = await response.text();
+    const result = JSON.parse(body, jsonDateReviver);
+    let newWaitlist = new Array(slots);
+    let number = 0;
+
+    for (let customer of result.data.waitlist) {
+      newWaitlist[customer.serialNo - 1] = customer;
+      number++;
+    }
+
+    this.setState({
+      waitlist: newWaitlist,
+      freeslots: slots - number
+    });
+  }
+
+  async addToWaitlist(customer) {
+    const newWaitlist = this.state.waitlist.slice();
+    const serialNo = parseInt(customer.serialNo);
+
+    if (newWaitlist[serialNo - 1] != null) {
+      alert(`Sorry, slot ${serialNo} is already occupied!`);
+    } else if (isNaN(serialNo)) {
+      alert("Sorry, you must provide a valid serial No. for the new customer!");
+    } else if (serialNo <= 0 || serialNo > slots) {
       alert(`Sorry, please ensure the serial No. is between 1 and ${slots}!`);
     } else if (customer.name == "") {
       alert("Sorry, you must provide the name of the customer!");
     } else if (customer.phone == "") {
       alert("Sorry, you must provide a phone number of the customer!");
     } else {
-      newWaitlist[serialNo] = customer;
-      this.setState({
-        freeslots: this.state.freeslots - 1,
-        waitlist: newWaitlist
+      const query = `mutation createCustomer($customer: CreationInputs!) {
+                createCustomer(customer: $customer) {
+                    serialNo
+                }
+            }`;
+      await fetch('/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query,
+          variables: {
+            customer
+          }
+        })
       });
-      alert(`Successfully added customer ${customer.name} (${customer.phone}) to slot ${serialNo + 1}!`);
+      alert(`Successfully added customer ${customer.name} (${customer.phone}) to slot ${serialNo}!`);
+      this.loadData();
     }
   }
 
@@ -54,6 +111,7 @@ class WaitlistPlatform extends React.Component {
     } else if (newWaitlist[serialNo] == null) {
       alert(`Sorry, serial No. ${serialNo + 1} is already empty!`);
     } else {
+      // pending new logic...
       newWaitlist[serialNo] = null;
       this.setState({
         freeslots: this.state.freeslots + 1,
@@ -128,7 +186,7 @@ function WaitlistGridTable(props) {
   }, /*#__PURE__*/React.createElement("table", {
     className: "grid_table"
   }, /*#__PURE__*/React.createElement("tbody", null, rows)), /*#__PURE__*/React.createElement(Switch, null, /*#__PURE__*/React.createElement(Route, {
-    path: "/:topicId"
+    path: "/show/:topicId"
   }, /*#__PURE__*/React.createElement(DetailedInfo, {
     waitlist: waitlist
   }))));
@@ -174,13 +232,13 @@ function WaitlistGridRow(props) {
 function WaitlistCell(props) {
   if (props.vacant) {
     return /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement(Link, {
-      to: `/${props.id}`
+      to: `/show/${props.id}`
     }, /*#__PURE__*/React.createElement("button", {
       className: "cell_vacant"
     }, props.children)));
   } else {
     return /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement(Link, {
-      to: `/${props.id}`
+      to: `/show/${props.id}`
     }, /*#__PURE__*/React.createElement("button", {
       className: "cell_occupied"
     }, props.children)));
@@ -208,11 +266,9 @@ class AddCustomer extends React.Component {
     e.preventDefault();
     const info = document.forms.add_customer;
     const customer = {
-      id: info.input_id.value,
       serialNo: info.input_id.value,
       name: info.input_name.value,
-      phone: info.input_phone.value,
-      timestamp: new Date(Date.now())
+      phone: info.input_phone.value
     };
     this.props.addToWaitlist(customer);
     info.input_id.value = "";
