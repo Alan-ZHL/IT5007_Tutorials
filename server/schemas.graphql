@@ -7,10 +7,18 @@ type Customer {
     timestamp: GraphQLDate!
 }
 
+type RetMessage {
+    message: String
+}
+
 input CreationInputs {
     serialNo: Int!
     name: String!
     phone: String!
+}
+
+input DeletionInputs {
+    serialNo: Int!
 }
 
 
@@ -21,5 +29,5 @@ type Query {
 
 type Mutation {
     createCustomer(customer: CreationInputs!): Customer!
-    deleteCustomer(serialNo: Int!): String
+    deleteCustomer(reference: DeletionInputs!): RetMessage
 }

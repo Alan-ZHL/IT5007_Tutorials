@@ -90,20 +90,31 @@ class WaitlistPlatform extends React.Component {
         }
     }
 
-    deleteFromWaitlist(serialNo) {
+    async deleteFromWaitlist(serialNo) {
         const newWaitlist = this.state.waitlist.slice();
         
-        if (serialNo == -Number.MAX_VALUE) {
-            alert("Sorry, please enter a serial No. to indicate a customer.");
-        } else if (serialNo < 0 || serialNo >= slots) {
+        if (isNaN(serialNo)) {
+            alert("Sorry, please enter a valid serial No. to indicate a customer.");
+        } else if (serialNo <= 0 || serialNo > slots) {
             alert(`Sorry, please ensure the serial No. is between 1 and ${slots}!`);
-        } else if (newWaitlist[serialNo] == null) {
-            alert(`Sorry, serial No. ${serialNo + 1} is already empty!`);
+        } else if (newWaitlist[serialNo-1] == null) {
+            alert(`Sorry, serial No. ${serialNo} is already empty!`);
         } else {
-            // pending new logic...
-            newWaitlist[serialNo] = null;
-            this.setState({freeslots: this.state.freeslots + 1, waitlist: newWaitlist});
-            alert(`Successfully deleted customer No. ${serialNo + 1}!`);
+            const query = `mutation deleteCustomer($reference: DeletionInputs!) {
+                deleteCustomer(reference: $reference) {
+                    message
+                }
+            }`;
+            const reference = {serialNo: serialNo};
+
+            const result = await fetch('/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json'},
+                body: JSON.stringify({ query, variables: { reference } })
+            });
+            const textResult = await result.json();
+            alert(textResult.data.deleteCustomer.message);
+            this.loadData();
         }
     }
     
@@ -349,11 +360,12 @@ class DeleteCustomer extends React.Component {
     removeCustomer(e) {
         e.preventDefault();
         const info = document.forms.delete_customer;
-        if (info.input_serialNo.value == "") {
-            this.props.deleteFromWaitlist(-Number.MAX_VALUE);
-        } else {
-            this.props.deleteFromWaitlist(parseInt(info.input_serialNo.value) - 1);
-        }
+        this.props.deleteFromWaitlist(parseInt(info.input_serialNo.value));
+        // if (info.input_serialNo.value == "") {
+        //     this.props.deleteFromWaitlist(-Number.MAX_VALUE);
+        // } else {
+        //     this.props.deleteFromWaitlist(parseInt(info.input_serialNo.value) - 1);
+        // }
         info.input_serialNo.value = "";
     }
 
