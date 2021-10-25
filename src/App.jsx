@@ -85,7 +85,7 @@ class WaitlistPlatform extends React.Component {
                 headers: { 'Content-Type': 'application/json'},
                 body: JSON.stringify({ query, variables: { customer } })
             });
-            alert(`Successfully added customer ${customer.name} (${customer.phone}) to slot ${serialNo}!`);
+            alert(`Successfully added customer ${customer.name} (contact: ${customer.phone}) to slot ${serialNo}!`);
             this.loadData();
         }
     }
@@ -361,11 +361,6 @@ class DeleteCustomer extends React.Component {
         e.preventDefault();
         const info = document.forms.delete_customer;
         this.props.deleteFromWaitlist(parseInt(info.input_serialNo.value));
-        // if (info.input_serialNo.value == "") {
-        //     this.props.deleteFromWaitlist(-Number.MAX_VALUE);
-        // } else {
-        //     this.props.deleteFromWaitlist(parseInt(info.input_serialNo.value) - 1);
-        // }
         info.input_serialNo.value = "";
     }
 
