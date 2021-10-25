@@ -1,0 +1,22 @@
+{
+  "name": "tut_5_ui",
+  "version": "1.0.0",
+  "description": "tutorial 5 for IT5007, ui part",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon -w uiserver.js uiserver.js",
+    "compile": "babel src --out-dir public",
+    "watch": "babel src --out-dir public --watch --verbose"
+  },
+  "author": "e0674587",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/preset-react": "^7.14.5",
+    "express": "^4.17.1",
+    "nodemon": "^1.19.4"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.15.7",
+    "@babel/core": "^7.15.5"
+  }
+}

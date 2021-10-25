@@ -1,0 +1,19 @@
+{
+  "name": "tut_5_api",
+  "version": "1.0.0",
+  "description": "tutorial 5 for IT5007, backend api",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon -e js,graphql server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "e0674587",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server-express": "^2.25.2",
+    "express": "^4.17.1",
+    "graphql": "^0.13.2",
+    "mongodb": "^3.7.3",
+    "nodemon": "^1.19.4"
+  }
+}
