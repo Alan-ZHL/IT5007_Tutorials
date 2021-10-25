@@ -85,14 +85,6 @@ async function deleteCustomer(_, { reference }) {
         console.log(e);
         return {message: "Deletion failed due to mismatch at the database."};
     }
-
-    // for (let i = 0; i < sample_list.length; i++) {
-    //     if (sample_list[i].serialNo == target) {
-    //         sample_list.splice(i,1);
-    //         return {message: `Deleted customer No.${target} successfully!`};
-    //     }
-    // }
-    // return {message: "Deletion failed due to mismatch at the database."};
 }
 
 

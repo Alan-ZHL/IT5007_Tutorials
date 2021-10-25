@@ -4,7 +4,7 @@
  *   mongo tutorial_IT5007 scripts/init.mongo.js
  */
 
-db.waitlist.remove({});
+db.waitlist.deleteMany({});
 
 // sample initialization
 const sample_list = [
