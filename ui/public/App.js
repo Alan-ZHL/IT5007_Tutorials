@@ -1,9 +1,11 @@
+// imports from ReactRouterDOM
 var Router = ReactRouterDOM.HashRouter;
 var Switch = ReactRouterDOM.Switch;
 var Route = ReactRouterDOM.Route;
 var Redirect = ReactRouterDOM.Redirect;
 var Link = ReactRouterDOM.Link;
-var useParams = ReactRouterDOM.useParams;
+var useParams = ReactRouterDOM.useParams; // global constants: waitlist size and regular expression for date detection
+
 const grid_row = 5;
 const grid_col = 5;
 const slots = grid_row * grid_col;
@@ -22,16 +24,19 @@ class WaitlistPlatform extends React.Component {
   constructor() {
     super();
     this.state = {
+      displayAll: false,
       freeslots: slots,
       waitlist: new Array(slots)
     };
+    this.switchDisplay = this.switchDisplay.bind(this);
     this.addToWaitlist = this.addToWaitlist.bind(this);
     this.deleteFromWaitlist = this.deleteFromWaitlist.bind(this);
   }
 
   componentDidMount() {
     this.loadData();
-  }
+  } // retrieve latest version of waitlist from backend
+
 
   async loadData() {
     const query = `query {
@@ -62,7 +67,21 @@ class WaitlistPlatform extends React.Component {
       waitlist: newWaitlist,
       freeslots: slots - number
     });
-  }
+  } // switch between two modes of display: customer list / grid table (showing vacancies)
+
+
+  switchDisplay() {
+    if (this.state.displayAll == false) {
+      this.setState({
+        displayAll: true
+      });
+    } else {
+      this.setState({
+        displayAll: false
+      });
+    }
+  } // add a new customer to the waitlist db and synchronously update the frontend states
+
 
   async addToWaitlist(customer) {
     const newWaitlist = this.state.waitlist.slice();
@@ -99,7 +118,8 @@ class WaitlistPlatform extends React.Component {
       alert(`Successfully added customer ${customer.name} (contact: ${customer.phone}) to slot ${serialNo}!`);
       this.loadData();
     }
-  }
+  } // delete a customer from the waitlist db and update the frontend
+
 
   async deleteFromWaitlist(serialNo) {
     const newWaitlist = this.state.waitlist.slice();
@@ -138,11 +158,16 @@ class WaitlistPlatform extends React.Component {
   }
 
   render() {
-    return /*#__PURE__*/React.createElement(Router, null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(DisplayHomepage, null), /*#__PURE__*/React.createElement(DisplayFreeslots, {
-      freeslots: this.state.freeslots
-    }), /*#__PURE__*/React.createElement(WaitlistGridTable, {
+    let waitlistTable = this.state.displayAll ? /*#__PURE__*/React.createElement(WaitlistTable, {
       waitlist: this.state.waitlist
-    }), /*#__PURE__*/React.createElement(Switch, null, /*#__PURE__*/React.createElement(Route, {
+    }) : /*#__PURE__*/React.createElement(WaitlistGridTable, {
+      waitlist: this.state.waitlist
+    });
+    return /*#__PURE__*/React.createElement(Router, null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(DisplayHomepage, null), /*#__PURE__*/React.createElement(DisplayFreeslots, {
+      freeslots: this.state.freeslots,
+      displayAll: this.state.displayAll,
+      switchDisplay: this.switchDisplay
+    }), waitlistTable, /*#__PURE__*/React.createElement(Switch, null, /*#__PURE__*/React.createElement(Route, {
       path: "/add"
     }, /*#__PURE__*/React.createElement(AddCustomer, {
       addToWaitlist: this.addToWaitlist
@@ -166,9 +191,13 @@ function DisplayHomepage() {
 
 
 function DisplayFreeslots(props) {
-  return /*#__PURE__*/React.createElement("div", {
+  const btnName = props.displayAll ? "Show Grid Table" : "Show All Customers";
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "block_freeslots"
-  }, "There remains ", /*#__PURE__*/React.createElement("b", null, props.freeslots), " empty slots in the waitlist.");
+  }, "There remains ", /*#__PURE__*/React.createElement("b", null, props.freeslots), " empty slots in the waitlist."), /*#__PURE__*/React.createElement(MyButtons, {
+    buttonType: "button_switch",
+    actionFunc: props.switchDisplay
+  }, btnName));
 } // toolbar block that supports redirection to adding/deleting a customer page
 
 
@@ -182,6 +211,29 @@ function Toolbar() {
   }, /*#__PURE__*/React.createElement(MyButtons, {
     buttonType: "button_delete"
   }, "Remove a Customer")));
+} // block showing all the reserved customers
+
+
+function WaitlistTable(props) {
+  let customers = [];
+
+  for (let i = 0; i < slots; i++) {
+    if (props.waitlist[i] != null) {
+      customers.push( /*#__PURE__*/React.createElement(WaitlistRow, {
+        key: i + 1,
+        customer: props.waitlist[i]
+      }));
+    }
+  }
+
+  return /*#__PURE__*/React.createElement("div", {
+    className: "block_table"
+  }, /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Serial No."), /*#__PURE__*/React.createElement("th", null, "Name"), /*#__PURE__*/React.createElement("th", null, "Phone Number"), /*#__PURE__*/React.createElement("th", null, "Timestamp"))), /*#__PURE__*/React.createElement("tbody", null, customers)));
+} // child component of WaitlistTable
+
+
+function WaitlistRow(props) {
+  return /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.customer.serialNo), /*#__PURE__*/React.createElement("td", null, props.customer.name), /*#__PURE__*/React.createElement("td", null, props.customer.phone), /*#__PURE__*/React.createElement("td", null, props.customer.timestamp.toLocaleString()));
 } // block that renders the waitlist as a grid table
 
 
@@ -233,7 +285,7 @@ function WaitlistGridRow(props) {
   var cells = new Array(grid_col);
 
   for (var i = 0; i < grid_col; i++) {
-    const vacant = waitlist[start + i] == null ? 0 : 1;
+    // const vacant = waitlist[start+i] == null ? 0 : 1;
     cells[i] = /*#__PURE__*/React.createElement(WaitlistCell, {
       key: start + i + 1,
       id: start + i + 1,
@@ -267,7 +319,8 @@ function MyButtons(props) {
   return /*#__PURE__*/React.createElement("div", {
     className: "block_button"
   }, /*#__PURE__*/React.createElement("button", {
-    className: buttonType
+    className: buttonType,
+    onClick: props.actionFunc
   }, props.children));
 } // AddCustomer: block that adds a customer to the waitlist
 

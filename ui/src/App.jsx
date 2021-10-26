@@ -1,3 +1,4 @@
+// imports from ReactRouterDOM
 var Router = ReactRouterDOM.HashRouter;
 var Switch = ReactRouterDOM.Switch;
 var Route = ReactRouterDOM.Route;
@@ -6,11 +7,11 @@ var Link = ReactRouterDOM.Link;
 var useParams = ReactRouterDOM.useParams;
 
 
+// global constants: waitlist size and regular expression for date detection
 const grid_row = 5;
 const grid_col = 5;
 const slots = grid_row * grid_col;
 const dateRegex = new RegExp('^\\d\\d\\d\\d-\\d\\d-\\d\\d');
-
 // recover the timestamp to a js Date() object
 function jsonDateReviver(key, value) {
     if (dateRegex.test(value)) {
@@ -25,9 +26,11 @@ class WaitlistPlatform extends React.Component {
     constructor() {
         super();
         this.state = {
+            displayAll: false,
             freeslots: slots,
             waitlist: new Array(slots)
         };
+        this.switchDisplay = this.switchDisplay.bind(this);
         this.addToWaitlist = this.addToWaitlist.bind(this);
         this.deleteFromWaitlist = this.deleteFromWaitlist.bind(this);
     }
@@ -36,6 +39,7 @@ class WaitlistPlatform extends React.Component {
         this.loadData();
     }
 
+    // retrieve latest version of waitlist from backend
     async loadData() {
         const query = `query {
             waitlist {
@@ -59,6 +63,16 @@ class WaitlistPlatform extends React.Component {
         this.setState({ waitlist: newWaitlist, freeslots: slots - number });
     }
 
+    // switch between two modes of display: customer list / grid table (showing vacancies)
+    switchDisplay() {
+        if (this.state.displayAll == false) {
+            this.setState({displayAll: true});
+        } else {
+            this.setState({displayAll: false});
+        }
+    }
+
+    // add a new customer to the waitlist db and synchronously update the frontend states
     async addToWaitlist(customer) {
         const newWaitlist = this.state.waitlist.slice();
         const serialNo = parseInt(customer.serialNo);
@@ -90,6 +104,7 @@ class WaitlistPlatform extends React.Component {
         }
     }
 
+    // delete a customer from the waitlist db and update the frontend
     async deleteFromWaitlist(serialNo) {
         const newWaitlist = this.state.waitlist.slice();
         
@@ -119,12 +134,21 @@ class WaitlistPlatform extends React.Component {
     }
     
     render() {
+        let waitlistTable = this.state.displayAll ? (
+            <WaitlistTable waitlist={this.state.waitlist}/>
+        ) : (
+            <WaitlistGridTable waitlist={this.state.waitlist}/>
+        );
+
         return (
             <Router>
                 <div>
                     <DisplayHomepage/>
-                    <DisplayFreeslots freeslots={this.state.freeslots}/>
-                    <WaitlistGridTable waitlist={this.state.waitlist}/>
+                    <DisplayFreeslots 
+                        freeslots={this.state.freeslots} 
+                        displayAll={this.state.displayAll} 
+                        switchDisplay={this.switchDisplay}/>
+                    {waitlistTable}
 
                     <Switch>
                         <Route path="/add">
@@ -156,10 +180,14 @@ function DisplayHomepage() {
 
 // DisplayFreeslots: block displaying all the empty slots
 function DisplayFreeslots(props) {
+    const btnName = (props.displayAll) ? "Show Grid Table" : "Show All Customers";
     return (
+        <>
         <div className="block_freeslots">
             There remains <b>{props.freeslots}</b> empty slots in the waitlist.
         </div>
+        <MyButtons buttonType="button_switch" actionFunc={props.switchDisplay}>{btnName}</MyButtons>
+        </>
     );
 }
 
@@ -175,6 +203,48 @@ function Toolbar() {
                 <MyButtons buttonType="button_delete">Remove a Customer</MyButtons>
             </Link>
         </React.Fragment>
+    );
+}
+
+
+// block showing all the reserved customers
+function WaitlistTable(props) {
+    let customers = [];
+    for (let i = 0; i < slots; i++) {
+        if (props.waitlist[i] != null) {
+            customers.push(<WaitlistRow key={i+1} customer={props.waitlist[i]} />);
+        }
+    }
+
+    return (
+        <div className="block_table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Serial No.</th>
+                        <th>Name</th>
+                        <th>Phone Number</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {customers}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+
+// child component of WaitlistTable
+function WaitlistRow(props) {
+    return (
+        <tr>
+            <td>{props.customer.serialNo}</td>
+            <td>{props.customer.name}</td>
+            <td>{props.customer.phone}</td>
+            <td>{props.customer.timestamp.toLocaleString()}</td>
+        </tr>
     );
 }
 
@@ -249,7 +319,6 @@ function WaitlistGridRow(props) {
 
     var cells = new Array(grid_col);
     for (var i = 0; i < grid_col; i++) {
-        const vacant = waitlist[start+i] == null ? 0 : 1;
         cells[i] = <WaitlistCell key={start+i+1} id={start+i+1} vacant={waitlist[start+i] == null ? 1 : 0}>
                 {start + i + 1}
             </WaitlistCell>;
@@ -295,7 +364,7 @@ function MyButtons(props) {
 
     return (
         <div className="block_button">
-            <button className={buttonType}>
+            <button className={buttonType} onClick={props.actionFunc}>
                 {props.children}
             </button>
         </div>

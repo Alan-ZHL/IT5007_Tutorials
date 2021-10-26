@@ -18,6 +18,12 @@ table {
     margin:auto
 }
 
+th {
+    border: 2px solid #779fdf;
+    background-color: #a3c6fd;
+    text-align: center;
+}
+
 td {
     border: 2px dotted #779fdf;
     background-color: #bbd1f6;
@@ -67,7 +73,7 @@ input {
     width: 80%;
 }
 
-.button_add, .button_delete, .button_home, .button_close, .cell_vacant, .cell_occupied {
+.button_add, .button_delete, .button_home, .button_close, .button_switch, .cell_vacant, .cell_occupied {
     font-size: 18px;
     border: 2px solid;
     border-radius: 5px;
@@ -98,6 +104,14 @@ input {
 .button_home, .button_close {
     background-color: #8eb8fc;
     border-color: #8eb8fc;
+}
+
+.button_switch {
+    padding: 5px 8px;
+    margin-top: 12px;
+    background-color: #dadada;
+    border-color: #dadada;
+    color: #7c7c7c;
 }
 
 .button_close {
