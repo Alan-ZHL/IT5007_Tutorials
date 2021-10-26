@@ -17,7 +17,7 @@ const sample_list = [
 
 
 async function testWithAsync() {
-    console.log("\n-------------CRD operation tests with MongoDB-------------\n");
+    console.log("\n-------------CRUD operation tests with MongoDB-------------\n");
     const client = new MongoClient(url, { useNewUrlParser: true });
 
     try {
@@ -40,19 +40,25 @@ async function testWithAsync() {
         console.log('Inserted IDs:\n', inserts.insertedIds);
 
         // test 4: reading the waitlist with inserted documents
-        console.log("\n-------------Test 4: Inserting documents to the waitlist--------------");
+        console.log("\n-------------Test 4: Reading documents from the waitlist--------------");
         const match = await collection.find({}).toArray();
         console.log('Result of find:\n', match);
 
-        // test 5: deleting the documents from the waitlist, and recover an empty collection
-        console.log("\n-------------Test 5: Deleting documents in the waitlist--------------");
+        //test 5: updating information of a document
+        console.log("\n-------------Test 5: Updating data in a document----------------");
+        const updates = await collection.updateOne({name: "Eddie"}, {$set: {phone: "01010101"}})
+        const updatedCustomer = await collection.find({name: "Eddie"}).toArray();
+        console.log("Resulting of updating the phone of customer \"Eddie\":", updatedCustomer);
+
+        // test 6: deleting the documents from the waitlist, and recover an empty collection
+        console.log("\n-------------Test 6: Deleting documents in the waitlist--------------");
         const deletes = await collection.deleteOne({name: "Eddie"});
         console.log("Result of deletion (on customer \"Eddie\"): ", deletes.acknowledged);
         var remainings = await collection.find({}).toArray();
         console.log("Remaining documents:\n", remainings);
         
         // Finalize: clear the collection
-        console.log("\nCongrats! You have passed all the tests!");
+        console.log("\nCongratulations! You have passed all the tests!");
         await collection.deleteMany({});
         remainings = await collection.find({}).toArray();
         console.log("\nRecovering the collection with:\n", remainings);
