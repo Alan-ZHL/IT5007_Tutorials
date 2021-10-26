@@ -48,7 +48,7 @@ async function testWithAsync() {
         console.log("\n-------------Test 5: Updating data in a document----------------");
         const updates = await collection.updateOne({name: "Eddie"}, {$set: {phone: "01010101"}})
         const updatedCustomer = await collection.find({name: "Eddie"}).toArray();
-        console.log("Resulting of updating the phone of customer \"Eddie\":", updatedCustomer);
+        console.log("Result of updating the phone of customer \"Eddie\":\n", updatedCustomer);
 
         // test 6: deleting the documents from the waitlist, and recover an empty collection
         console.log("\n-------------Test 6: Deleting documents in the waitlist--------------");

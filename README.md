@@ -5,6 +5,10 @@
 ## Quick Guide for running the App
 
 ### Step 0: Preparations
+First of all, please make sure you have MongoDB installed in your machine. I choose to use the Ubuntu (20.04.3 LTS) image with MongoDB (version 5.0.3) provided on Docker Hub, and it works fine with my programs. To get this image from Docker Hub, please use the command on your **host machine**:
+```
+docker pull mongo
+```
 Before trying out the following steps, please check if the server system has the following packages installed ("add 'sudo' before the commands if necessary"):
 ```
 apt update
@@ -12,12 +16,10 @@ apt upgrade
 apt install git
 apt install curl
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+# restart the container to enable nvm
+nvm --version
 nvm install 10
 npm install -g npm@6
-```
-Besides, please make sure you have MongoDB installed in your machine. I choose to use the Ubuntu (20.04.3 LTS) image with MongoDB (version 5.0.3) provided on Docker Hub, and it works fine with my programs. To get this image from Docker Hub, please use the command on your **host machine**:
-```
-docker pull mongo
 ```
 
 ### Step 1 [should have installed git]: Clone from Github
