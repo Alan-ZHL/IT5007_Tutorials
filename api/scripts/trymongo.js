@@ -46,19 +46,19 @@ async function testWithAsync() {
 
         //test 5: updating information of a document
         console.log("\n-------------Test 5: Updating data in a document----------------");
-        const updates = await collection.updateOne({name: "Eddie"}, {$set: {phone: "01010101"}})
+        await collection.updateOne({name: "Eddie"}, {$set: {phone: "01010101"}})
         const updatedCustomer = await collection.find({name: "Eddie"}).toArray();
         console.log("Result of updating the phone of customer \"Eddie\":\n", updatedCustomer);
 
         // test 6: deleting the documents from the waitlist, and recover an empty collection
         console.log("\n-------------Test 6: Deleting documents in the waitlist--------------");
-        const deletes = await collection.deleteOne({name: "Eddie"});
-        console.log("Result of deletion (on customer \"Eddie\"): ", deletes.acknowledged);
+        await collection.deleteOne({name: "Eddie"});
+        console.log("Result of deletion (on customer \"Eddie\"): ");
         var remainings = await collection.find({}).toArray();
         console.log("Remaining documents:\n", remainings);
         
         // Finalize: clear the collection
-        console.log("\nCongratulations! You have passed all the tests!");
+        console.log("\n---------------Congratulations! You have passed all the tests!----------------");
         await collection.deleteMany({});
         remainings = await collection.find({}).toArray();
         console.log("\nRecovering the collection with:\n", remainings);
