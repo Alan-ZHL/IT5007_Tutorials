@@ -27,6 +27,9 @@ async function testWithAsync() {
         console.log('Connected to MongoDB.\n');
         const db = client.db();
         const collection = db.collection('waitlist');
+        db.collection("waitlist").createIndex({ serialNo: 1 }, { unique: true });
+        db.collection("waitlist").createIndex({ name: 1 });
+        db.collection("waitlist").createIndex({ phone: 1 });
 
         // test 2: clear the documents in the waitlist and test from an empty state
         console.log("\n-------------Test 2: Clearing the collection \"waitlist\"--------------");
