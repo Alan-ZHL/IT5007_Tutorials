@@ -6,7 +6,7 @@ const { Kind } = require('graphql/language');
 const { MongoClient } = require('mongodb');
 
 
-const url = "mongodb://localhost/tutorial_IT5007";
+const url = "mongodb://localhost/tutorial_IT5007";    // port 27017 should be listened by "mongod" service
 var db;
 
 
@@ -68,10 +68,10 @@ async function createCustomer(_, { customer }) {
         customer.timestamp = new Date(Date.now());
         const insertResult = await db.collection("waitlist").insertOne(customer);
         const confirmedCustomer = await db.collection("waitlist").findOne({_id: insertResult.insertedId});
-        return confirmedCustomer;
+        return confirmedCustomer
     } catch(e) {
         console.log(e);
-        return customer
+        return {serialNo: -1}
     }
 }
 
