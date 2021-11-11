@@ -36,6 +36,7 @@ const GraphQLDate = new GraphQLScalarType({
 const resolvers = {
     Query: {
         waitlist,
+        checkExistence,
     },
     Mutation: {
         createCustomer,
@@ -63,6 +64,20 @@ async function waitlist() {
     return waitlist
 }
 
+// newly added for tutorial 6
+async function checkExistence(_, { serialNo }) {
+    try {
+        const dupRecord = await db.collection("waitlist").findOne({serialNo: serialNo});
+        if (!dupRecord) {
+            return {serialNo: -1, name: "", phone: "", timestamp: new Date(Date.now())};
+        }
+        return dupRecord;
+    } catch(e) {
+        console.log(e);
+        return {serialNo: -1, name: "", phone: "", timestamp: new Date(Date.now())};
+    }
+}
+
 async function createCustomer(_, { customer }) {
     try {
         customer.timestamp = new Date(Date.now());
@@ -71,7 +86,7 @@ async function createCustomer(_, { customer }) {
         return confirmedCustomer
     } catch(e) {
         console.log(e);
-        return {serialNo: -1}
+        return {serialNo: -1};
     }
 }
 

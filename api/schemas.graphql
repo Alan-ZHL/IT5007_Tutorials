@@ -25,6 +25,7 @@ input DeletionInputs {
 "Top level schemas"
 type Query {
     waitlist: [Customer!]!
+    checkExistence(serialNo: Int!): Customer!
 }
 
 type Mutation {
