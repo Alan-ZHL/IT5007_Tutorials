@@ -12,7 +12,7 @@ docker pull mongo
 ```
 
 ### Step 1: Recover the Mobile (UI) Server (on Windows 10)
-(for Linux system with GUI, just ensure that the git, nodejs, react-native CLI, JDK, Python and Android Studio are installed.)
+(for Linux system with GUI, just ensure that the git, nodejs, react-native CLI, JDK, Python and Android Studio are installed.)  
 First of all, we should allow Windows to install packages the way Linux does. Please follow [this guidance](https://dev-yakuza.posstree.com/en/react-native/install-on-windows/#nodejs) to install Chocolatey, nodejs (please specify "--version 14.18.1"), React Native CLI, JDK and Android Studio.  Remember to add and check the environment variables mentioned in the guidance.  
 Meanwhile, please make sure git and Python has been installed on the server.  
 Secondly, clone the resources from [Github](https://github.com/AlanZhl/IT5007_Toturials.git):
