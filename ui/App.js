@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 
-//import { graphql } from 'react-apollo';
-//import gql from 'graphql-tag';
-
 const SLOTS = 25;
 
 
@@ -53,12 +50,20 @@ function App() {
 
     // shows the existent customer of a slot (responsive to the change of input_serialNo)
     const ExistentCustomer = dup != null ? (
-        <View>
-            <Text>Existent Customer</Text>
-            <Text>Serial No: {dup.serialNo}</Text>
-            <Text>Name: {dup.name}</Text>
-            <Text>Phone Number: {dup.phone}</Text>
-            <Text>Creation Timestamp: {dup.timestamp}</Text>
+        <View style={styles.warningFrame}>
+            <Text style={styles.warningTitle}>Existent Customer</Text>
+                <Text style={styles.content}>
+                    <Text style={styles.label}>Serial No: {dup.serialNo}</Text>
+                </Text>
+                <Text style={styles.content}>
+                    <Text style={styles.label}>Name:</Text> {dup.name}
+                </Text>
+                <Text style={styles.content}>
+                    <Text style={styles.label}>Phone Number:</Text> {dup.phone}
+                </Text>
+                <Text style={styles.content}>
+                    <Text style={styles.label}>Creation Time:</Text> {dup.timestamp}
+                </Text>
         </View>
     ) : (
         null
@@ -104,7 +109,7 @@ function App() {
         <View style={styles.container}>
             <Text style={styles.title}>Add New Customer</Text>
             <TextInput
-                placeholder="Choose a slot between 1 and 25."
+                placeholder={`Choose a slot between 1 and ${SLOTS}.`}
                 value={input_serialNo}
                 onChangeText={checkSerialNo}
                 keyboardType="numeric"
@@ -147,6 +152,13 @@ const styles = StyleSheet.create({
         textAlign: "center",
         backgroundColor: "#eeeeee"
     },
+    warningTitle: {
+        fontSize: 24,
+        fontWeight: "600",
+        color: "#ff3300",
+        textAlign: "center",
+        backgroundColor: "#ffcc66"
+    },
     input: {
         backgroundColor: '#e0e0e0',
         margin: 20,
@@ -156,8 +168,20 @@ const styles = StyleSheet.create({
         fontSize: 16
     },
     button: {
+        margin: 20
+    },
+    warningFrame: {
         margin: 20,
-        marginBottom: 45
+        padding: 10,
+        borderRadius: 15,
+        borderWidth: 3,
+        borderColor: "#ff3300"
+    },
+    label: {
+        fontWeight: "600"
+    },
+    content: {
+        fontSize: 16
     }
 });
 
